@@ -120,11 +120,15 @@ async function request(method, pathAndQuery, body) {
       /* non-JSON error page */
     }
     if (!res.ok) {
+      const defaultMsg =
+        res.status === 404
+          ? 'The global leaderboard API is not available on this server.'
+          : `Request failed (${res.status}).`;
       return {
         ok: false,
         status: res.status,
-        code: json?.error?.code || 'http_error',
-        message: json?.error?.message || `Request failed (${res.status}).`
+        code: json?.error?.code || (res.status === 404 ? 'not_found' : 'http_error'),
+        message: json?.error?.message || defaultMsg
       };
     }
     return { ok: true, data: json };

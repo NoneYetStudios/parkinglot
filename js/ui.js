@@ -690,7 +690,7 @@ export class GameUI {
     }
 
     const rows = document.createDocumentFragment();
-    for (const e of entries) {
+    entries.forEach((e, idx) => {
       const tr = document.createElement('tr');
       const cell = (text, cls) => {
         const td = document.createElement('td');
@@ -698,7 +698,8 @@ export class GameUI {
         if (cls) td.className = cls;
         tr.appendChild(td);
       };
-      cell(String(e.rank), 'global-rank');
+      const rankNum = e.rank !== undefined && e.rank !== null ? e.rank : (offset + idx + 1);
+      cell(String(rankNum), 'global-rank');
       cell(e.nickname, 'global-nick');
       cell(Number(e.score).toLocaleString(), 'global-score');
       cell(LOTS[e.lotId]?.name || e.lotId);
@@ -708,7 +709,7 @@ export class GameUI {
       cell(`${modNames} (${Number(e.difficultyMultiplier).toFixed(2)}×)`);
       cell(new Date(e.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
       rows.appendChild(tr);
-    }
+    });
     this.globalTableBody.appendChild(rows);
 
     const first = entries.length ? offset + 1 : 0;

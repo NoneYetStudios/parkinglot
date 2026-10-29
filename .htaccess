@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Route all /api/* requests to api/index.php
+    RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+</IfModule>
+
+# Prevent direct web downloading of database, key, and environment files
+<FilesMatch "\.(sqlite|sqlite3|db|env|key|log)$">
+    Require all denied
+</FilesMatch>
+
+# Optional security headers for Apache / LiteSpeed
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "no-referrer"
+</IfModule>

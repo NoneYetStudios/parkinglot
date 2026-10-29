@@ -68,14 +68,20 @@ npm start
 
 See [`docs/LEADERBOARD.md`](docs/LEADERBOARD.md) for full details on database schema, migrations, anti-cheat validation, backups, and security headers.
 
-### Option B: Static Web Hosting (cPanel / JetHost / Cloudflare Pages / Netlify)
+### Option B: JetHost / cPanel / Apache / PHP Hosting (Native SQLite Leaderboard)
 
-The game is completely static-compatible. Upload the following directly into your subdomain document root (e.g. `public_html/parkinglot/`):
+Like **WorstFlorist** and **LemonadeStand**, Parking Lot includes a zero-config native PHP + SQLite API in `api/index.php`. Upload the following to your subdomain root (e.g. `public_html/parkinglot/`):
 - `index.html`
 - `css/`
 - `js/`
+- `api/` (`api/index.php` and `api/.htaccess`)
+- `.htaccess` (root routing and database protection)
 
-The game mechanics, sound effects, deduction puzzles, and Local Personal Records will function 100% in the browser. When static-only, Global Leaderboard network queries cleanly report offline without disrupting gameplay.
+JetHost will automatically run the PHP SQLite API and serve the game without needing Node.js or any background daemon.
+
+### Option C: Pure Static Web Hosting (Cloudflare Pages / GitHub Pages / Netlify)
+
+Upload `index.html`, `css/`, and `js/`. The game mechanics, sound effects, deduction puzzles, and Local Personal Records will function 100% in the browser. Leaderboard queries cleanly report offline without disrupting gameplay.
 
 ---
 
