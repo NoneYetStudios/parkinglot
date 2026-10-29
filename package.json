@@ -1,0 +1,17 @@
+{
+  "name": "parkinglot",
+  "version": "1.1.0",
+  "description": "Parking Lot V1 - A Stab The Finger Game",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "test": "node tests/verify_all.mjs && node --no-warnings tests/leaderboard_api.mjs && node --no-warnings tests/auto_submit_preference.mjs",
+    "test:leaderboard": "node --no-warnings tests/leaderboard_api.mjs",
+    "test:pref": "node --no-warnings tests/auto_submit_preference.mjs",
+    "test:e2e": "node tests/e2e_browser_test.mjs && node --no-warnings tests/e2e_leaderboard_browser.mjs",
+    "test:e2e:leaderboard": "node --no-warnings tests/e2e_leaderboard_browser.mjs"
+  }
+}

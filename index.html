@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parking Lot — A Stab The Finger Game</title>
+  <meta
+    name="description"
+    content="Find a parking space before you lose your patience and damage your car. A Minesweeper-style parking deduction and time-management comedy game."
+  />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <h1 class="site-title">🅿️ Parking Lot</h1>
+        <a class="brand-link" href="https://stabthefinger.com/" target="_blank" rel="noopener">
+          A Stab The Finger Game
+        </a>
+      </div>
+      <nav class="header-actions" aria-label="Game utility controls">
+        <button type="button" id="btn-help" class="btn-nav">❓ How to Play</button>
+        <button type="button" id="btn-records" class="btn-nav">🏆 Local Records</button>
+        <button type="button" id="btn-global" class="btn-nav">🌍 Global Leaderboard</button>
+        <button type="button" id="btn-mute" class="btn-nav" aria-pressed="true">🔊 Sound</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <!-- =====================================================================
+         SCREEN 1: LOT & MODIFIER SELECTION (MENU)
+         ===================================================================== -->
+    <section id="screen-menu" aria-label="Parking Lot Setup">
+      <div class="hero-banner">
+        <div class="hero-text">
+          <h2>Find a parking space before you lose your patience and damage your car.</h2>
+          <p>
+            Inspect stalls, use Minesweeper-style trouble clues to avoid carts, bad parkers, and
+            <strong>The Goose</strong>, and decide whether to take an acceptable spot now or keep
+            hunting for front-row glory.
+          </p>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h2 class="section-heading">1. Select a Parking Lot</h2>
+        <div id="lot-cards-container" class="lot-cards-grid" role="group" aria-label="Parking Lot Environments"></div>
+      </div>
+
+      <div class="setup-section">
+        <h2 class="section-heading">2. Select Difficulty Configuration</h2>
+        <div id="modifier-cards-container" class="modifier-cards-grid" role="group" aria-label="Difficulty Modifiers"></div>
+      </div>
+
+      <div class="setup-section">
+        <h2 class="section-heading">3. Review Lot Conditions &amp; Enter</h2>
+        <div class="launch-bar">
+          <div id="lot-preview-panel"></div>
+          <button type="button" id="btn-enter-lot" class="btn-primary">
+            🚗 ENTER PARKING LOT
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-section" id="section-leaderboard-pref">
+        <div class="global-pref-card">
+          <div class="global-pref-toggle-row">
+            <label class="pref-toggle-label" for="toggle-auto-submit">
+              <input type="checkbox" id="toggle-auto-submit" class="pref-checkbox" />
+              <span class="pref-toggle-text">Automatically submit scores to global leaderboard</span>
+            </label>
+            <button type="button" id="btn-menu-open-global" class="btn-nav btn-sm">🌍 View Leaderboard</button>
+          </div>
+          <div id="nickname-config-group" class="pref-nickname-group" hidden>
+            <div class="nickname-field-row">
+              <label for="input-leaderboard-nickname" class="pref-field-label">Leaderboard nickname</label>
+              <div class="nickname-input-wrap">
+                <input
+                  type="text"
+                  id="input-leaderboard-nickname"
+                  class="pref-nickname-input"
+                  maxlength="16"
+                  autocomplete="off"
+                  placeholder="Choose nickname"
+                  aria-label="Leaderboard nickname"
+                />
+                <button type="button" id="btn-generate-nickname" class="btn-tool btn-sm" title="Generate a random nickname">🎲 Random</button>
+              </div>
+            </div>
+            <p class="pref-public-notice">
+              📢 <strong>Public:</strong> Nickname and submitted scores are publicly visible on the global leaderboard.
+            </p>
+            <p id="pref-nickname-feedback" class="pref-feedback-msg" role="alert" hidden></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SCREEN 2: ACTIVE PARKING LOT GAMEPLAY
+         ===================================================================== -->
+    <section id="screen-game" aria-label="Active Parking Lot" hidden>
+      <!-- Top HUD -->
+      <div class="game-hud-bar">
+        <div class="hud-block">
+          <span class="hud-eyebrow">Current Environment</span>
+          <strong id="hud-lot-name" class="hud-lot-title">Dollar Store</strong>
+          <span id="hud-modifiers" class="hud-sub">Standard (1.00×)</span>
+        </div>
+
+        <div class="hud-block">
+          <span class="hud-eyebrow">Elapsed Time</span>
+          <div id="hud-timer" class="hud-timer-value" aria-live="off">00:00</div>
+          <span class="hud-sub">Faster park = higher efficiency</span>
+        </div>
+
+        <div class="hud-block">
+          <div class="patience-header">
+            <span class="hud-eyebrow">Patience Meter</span>
+            <strong id="hud-patience-value">100 / 100</strong>
+          </div>
+          <div class="patience-bar-track" role="progressbar" aria-label="Remaining patience">
+            <div id="hud-patience-fill" class="patience-bar-fill" style="width: 100%;"></div>
+          </div>
+          <div id="hud-patience-event" class="patience-event-log" aria-live="polite">
+            Ready to search.
+          </div>
+        </div>
+
+        <div class="hud-controls">
+          <button type="button" id="btn-flag-mode" class="btn-tool" aria-pressed="false">
+            ⚠️ Flag Hazard Mode: OFF
+          </button>
+          <button type="button" id="btn-abandon-round" class="btn-nav">
+            ↩ Change Lot
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Split: Parking Lot Grid + Right Inspector Column -->
+      <div class="game-main-layout">
+        <div class="lot-board-wrapper">
+          <div id="storefront-banner" class="storefront-banner"></div>
+          <div id="board-grid-container" role="grid" aria-label="Parking Lot Spaces"></div>
+          <div id="bottom-storefront-banner" class="storefront-banner bottom-banner" style="display: none;"></div>
+        </div>
+
+        <aside class="game-side-column" aria-label="Goose Commentary and Space Inspector">
+          <div class="goose-widget">
+            <div id="goose-avatar" class="goose-avatar"></div>
+            <div class="goose-text-col">
+              <div class="goose-header-row">
+                <span class="goose-title">🪿 The Goose Watch</span>
+                <button type="button" id="btn-poke-goose" class="btn-honk">Honk</button>
+              </div>
+              <p id="goose-speech" class="goose-speech">
+                “The Goose is observing the lot.”
+              </p>
+            </div>
+          </div>
+
+          <div id="inspector-content" class="inspector-panel" aria-live="polite"></div>
+
+          <div class="clue-legend-card">
+            <strong>How Clues Work:</strong> Visibly parked cars and concrete poles are already shown
+            on the lot. Every unknown <code>?</code> stall is either an <strong>Available Safe Space</strong>
+            or a <strong>Hidden Hazard</strong> (Loose Cart, The Goose, Eternal Reverse Driver, or
+            Mystery Stain). Each circular clue badge (<code>0</code>–<code>8</code>) equals the
+            <strong>exact count of Hidden Hazards</strong> in the 8 surrounding stalls. Combine clues
+            and flag (<code>⚠️</code>) hazards to verify safe spaces before parking!
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SCREEN 3: RESULTS & INSURANCE ASSESSMENT
+         ===================================================================== -->
+    <section id="screen-results" class="results-container" aria-label="Round Results" hidden>
+      <div id="results-content">
+        <div id="results-cards-container"></div>
+        <div class="results-actions">
+          <button type="button" id="btn-park-again" class="btn-primary">🔄 PARK AGAIN</button>
+          <button type="button" id="btn-change-lot" class="btn-nav">🗺️ CHANGE LOT</button>
+          <button type="button" id="btn-main-menu" class="btn-nav">🏠 MAIN MENU</button>
+        </div>
+        <div id="results-records-strip" class="results-records-strip"></div>
+      </div>
+      <div id="global-submit-panel" class="global-submit-panel" hidden></div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       MODAL: HOW TO PLAY
+       ===================================================================== -->
+  <div id="modal-help" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="help-modal-title" hidden>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="help-modal-title">How to Play Parking Lot</h2>
+        <button type="button" class="btn-nav" data-close-modal>✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <p>
+          <strong>Goal:</strong> Find and commit to <em>any</em> safe, available parking space before
+          you run out of patience. You do <strong>not</strong> need to clear the board!
+        </p>
+        <ul>
+          <li>
+            <strong>The Strategic Dilemma:</strong> Every safe space has a quality rating from
+            <strong>Excellent (1.65×, 5 stars)</strong> near the entrance down to
+            <strong>Risky (0.55×, 1 star)</strong> in the distant corners. Do you take a
+            <strong>Good</strong> or <strong>Great</strong> spot right now while your Time Efficiency is high, or spend
+            more time and patience hunting for a front-row gem?
+          </li>
+          <li>
+            <strong>Minesweeper Clues:</strong> Every inspected stall displays the exact number
+            (<code>0</code>–<code>8</code>) of adjacent <strong>Trouble Stalls</strong> (Loose
+            Carts, The Goose, Eternal Reverse Lights, Mystery Stains, Blocked Poles, and Oversized
+            Bad Parkers). Ordinary parked sedans are harmless and don't add to the trouble count.
+          </li>
+          <li>
+            <strong>Patience vs. Elapsed Time:</strong> Elapsed time counts up for your Time
+            Efficiency Multiplier. Patience only drains when you inspect spaces or stumble directly
+            into a frustrating hazard—never while you stop to think!
+          </li>
+          <li>
+            <strong>Accidents &amp; Deductibles:</strong> Parking in a wide-open spot has a
+            <strong>0% accident risk</strong>. Parking next to loose carts, oversized trucks, or
+            The Goose carries a clearly displayed risk of a collision penalty and insurance
+            deductible.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: LOCAL RECORDS
+       ===================================================================== -->
+  <div id="modal-records" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="records-modal-title" hidden>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="records-modal-title">Local Parking Records</h2>
+        <button type="button" class="btn-nav" data-close-modal>✕ Close</button>
+      </div>
+      <div id="records-modal-content"></div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" id="btn-reset-records" class="btn-nav" style="border-color:#ef4444; color:#fca5a5;">
+          🗑️ Reset Local Records
+        </button>
+        <button type="button" class="btn-nav" data-close-modal>Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: GLOBAL LEADERBOARD
+       ===================================================================== -->
+  <div id="modal-global" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="global-modal-title" hidden>
+    <div class="modal-dialog modal-dialog-wide">
+      <div class="modal-header">
+        <h2 id="global-modal-title">🌍 Global Leaderboard</h2>
+        <button type="button" class="btn-nav" data-close-modal>✕ Close</button>
+      </div>
+      <p class="global-scope-note">
+        <strong>Global records</strong> from all players. Your own <em>Local Records</em> are separate and stay on this device.
+      </p>
+      <div class="global-pref-card global-pref-card-modal">
+        <div class="global-pref-toggle-row">
+          <label class="pref-toggle-label" for="toggle-auto-submit-modal">
+            <input type="checkbox" id="toggle-auto-submit-modal" class="pref-checkbox" />
+            <span class="pref-toggle-text">Automatically submit scores to global leaderboard</span>
+          </label>
+        </div>
+        <div id="nickname-config-group-modal" class="pref-nickname-group" hidden>
+          <div class="nickname-field-row">
+            <label for="input-leaderboard-nickname-modal" class="pref-field-label">Leaderboard nickname</label>
+            <div class="nickname-input-wrap">
+              <input
+                type="text"
+                id="input-leaderboard-nickname-modal"
+                class="pref-nickname-input"
+                maxlength="16"
+                autocomplete="off"
+                placeholder="Choose nickname"
+                aria-label="Leaderboard nickname"
+              />
+              <button type="button" id="btn-generate-nickname-modal" class="btn-tool btn-sm" title="Generate a random nickname">🎲 Random</button>
+            </div>
+          </div>
+          <p class="pref-public-notice">
+            📢 <strong>Public:</strong> Nickname and submitted scores are publicly visible on the global leaderboard.
+          </p>
+          <p id="pref-nickname-feedback-modal" class="pref-feedback-msg" role="alert" hidden></p>
+        </div>
+      </div>
+      <div class="global-filters">
+        <label>Lot
+          <select id="global-filter-lot"></select>
+        </label>
+        <label>Difficulty
+          <select id="global-filter-mods"></select>
+        </label>
+      </div>
+      <div id="global-status" class="global-status" role="status" aria-live="polite"></div>
+      <div class="global-table-wrap">
+        <table class="records-table global-table" aria-label="Global leaderboard">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Player</th>
+              <th scope="col">Score</th>
+              <th scope="col">Lot</th>
+              <th scope="col">Difficulty</th>
+              <th scope="col">Date</th>
+            </tr>
+          </thead>
+          <tbody id="global-table-body"></tbody>
+        </table>
+      </div>
+      <div class="global-pager">
+        <button type="button" id="global-prev" class="btn-nav">← Previous</button>
+        <span id="global-page-info"></span>
+        <button type="button" id="global-next" class="btn-nav">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
