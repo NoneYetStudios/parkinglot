@@ -2,7 +2,7 @@
 
 A Minesweeper-style parking deduction and time-management comedy game. Inspect stalls, use trouble clues to dodge stray carts, bad parkers, and **The Goose**, and decide whether to take an acceptable spot now or keep hunting for front-row glory before you lose your patience.
 
-Playable online at [parkinglot.stabthefinger.com](https://parkinglot.stabthefinger.com/).
+Built with **Google Antigravity** · Play it live: [parkinglot.stabthefinger.com](https://parkinglot.stabthefinger.com) · Part of the [STF Arcade](https://stabthefinger.com/stfarcade.html)
 
 ---
 
